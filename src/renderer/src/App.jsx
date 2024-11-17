@@ -1,3 +1,5 @@
+import './App.css' // Import the CSS file
+
 function App() {
   const createUser = () => {
     window.electron.ipcRenderer.send('create-user', {
@@ -19,10 +21,16 @@ function App() {
   })
 
   return (
-    <div>
-      <h1>Versions</h1>
-      <button onClick={createUser}>Create User</button>
-      <button onClick={runQuery}>Run Query</button>
+    <div className="app-container">
+      <h1>Bracketeer</h1>
+      <div className="button-container">
+        <button className="beveled-button" onClick={createUser}>
+          Open New Session
+        </button>
+        <button className="beveled-button" onClick={runQuery}>
+          Load Session From History
+        </button>
+      </div>
     </div>
   )
 }
