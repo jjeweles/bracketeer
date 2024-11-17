@@ -2,8 +2,10 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { sequelize } from '../database/sequelize'
+import User from '../database/models/User'
 
-function createWindow() {
+async function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -38,7 +40,7 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -52,6 +54,9 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  // Sync the db
+  await sequelize.sync()
+
   createWindow()
 
   app.on('activate', function () {
@@ -59,6 +64,29 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+// Handle IPC message to create a new user
+ipcMain.on('create-user', async (event, userData) => {
+  try {
+    console.log('Creating user:', userData) // Log the user data
+    const user = await User.create(userData)
+    console.log('User created:', user) // Log the created user
+  } catch (error) {
+    console.error('Error creating user:', error)
+  }
+})
+
+// Function to run the SQLite query
+ipcMain.on('run-query', async (event, query) => {
+  try {
+    const results = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT })
+    console.log('Query results:', results)
+    event.reply('query-results', results)
+  } catch (error) {
+    console.error('Error running query:', error)
+    event.reply('query-error', error.message)
+  }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -69,6 +97,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
