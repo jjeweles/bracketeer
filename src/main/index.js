@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -6,10 +6,17 @@ import { sequelize } from '../database/sequelize'
 import User from '../database/models/User'
 
 async function createWindow() {
+  // Get user's screen size
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize
+
+  // Make desktop app 80% of the user's screen size
+  const windowWidth = Math.round(width * 0.8)
+  const windowHeight = Math.round(height * 0.8)
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: windowWidth,
+    height: windowHeight,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
