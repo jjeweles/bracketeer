@@ -39,7 +39,7 @@
     "prettier": "^3.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "vite": "^6.1.1"
+    "vite": "^6.3.5"
   },
   "build": {
     "appId": "com.jj.bracketeer",
