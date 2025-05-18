@@ -7,7 +7,6 @@ export default function App() {
   const submit = async (e) => {
     e.preventDefault()
     // call your IPC-backed addBowler endpoint
-    console.log('Adding bowler: ' + name)
     const res = await window.api.addBowler(name)
     console.log('Response: ' + res)
     setStatus(res.success ? 'Added!' : `Error: ${res.error}`)
