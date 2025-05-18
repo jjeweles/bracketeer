@@ -1,8 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { spawn } from 'child_process'
-import path from 'path'
+import fs from 'fs'
 import addBowler from './api/controller'
 import icon from './resources/icon.png?asset'
 
@@ -28,13 +28,24 @@ function getPocketBasePath() {
 
 function startPocketBase() {
   const pbPath = getPocketBasePath()
-  // spawn the server; adjust args as needed:
-  pbProcess = spawn(pbPath, ['serve', '--http=127.0.0.1:8090', '--dir=./pb_data'], {
-    cwd: app.getPath('userData'),
-    stdio: ['ignore', 'pipe', 'pipe']
+  const dataDir = path.join(app.getPath('userData'), 'pb_data')
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir)
+
+  return new Promise((resolve, reject) => {
+    pbProcess = spawn(pbPath, ['serve', '--http=127.0.0.1:8090', `--dir=${dataDir}`], {
+      stdio: ['ignore', 'pipe', 'pipe']
+    })
+
+    pbProcess.stdout.on('data', (d) => {
+      const msg = d.toString()
+      console.log(`[PocketBase] ${msg}`)
+      if (msg.includes('Serving') || msg.includes('Listening')) {
+        resolve()
+      }
+    })
+    pbProcess.stderr.on('data', (d) => console.error(`[PocketBase ERROR] ${d}`))
+    pbProcess.on('error', reject)
   })
-  pbProcess.stdout.on('data', (d) => console.log(`[PocketBase] ${d}`))
-  pbProcess.stderr.on('data', (d) => console.error(`[PocketBase ERROR] ${d}`))
 }
 
 function stopPocketBase() {
@@ -84,33 +95,34 @@ async function createWindow() {
 
 ipcMain.handle('pb-add-bowler', (_, name) => addBowler(name))
 
+app.on('before-quit', () => {
+  console.log('App is quitting, stopping PocketBase…')
+  stopPocketBase()
+})
+app.on('will-quit', () => {
+  console.log('Will-quit event, stopping PocketBase…')
+  stopPocketBase()
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(async () => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+app
+  .whenReady()
+  .then(async () => {
+    electronApp.setAppUserModelId('com.electron')
+    app.on('browser-window-created', (_, w) => optimizer.watchWindowShortcuts(w))
+    ipcMain.on('ping', () => console.log('pong'))
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
   })
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
-  startPocketBase()
-
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  .then(startPocketBase) // waits for PB to be ready
+  .then(createWindow) // only then load the UI
+  .catch((err) => {
+    console.error('Failed to start:', err)
+    app.quit()
   })
-})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
