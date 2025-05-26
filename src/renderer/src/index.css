@@ -1,3 +1,162 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* macOS window controls styling */
+.mac-drag-region {
+  -webkit-app-region: drag;
+}
+
+.mac-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Ensure buttons and interactive elements are not draggable on macOS */
+button, input, select, textarea, [role="button"] {
+  -webkit-app-region: no-drag;
+}
+
+/* Print styles */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+  
+  .print\:page-break-before-always {
+    page-break-before: always !important;
+  }
+  
+  .print\:p-4 {
+    padding: 1rem !important;
+  }
+  
+  .print\:p-2 {
+    padding: 0.5rem !important;
+  }
+  
+  .print\:p-1 {
+    padding: 0.25rem !important;
+  }
+  
+  .print\:pt-2 {
+    padding-top: 0.5rem !important;
+  }
+  
+  .print\:pt-4 {
+    padding-top: 1rem !important;
+  }
+  
+  .print\:mb-4 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .print\:mb-8 {
+    margin-bottom: 2rem !important;
+  }
+  
+  .print\:mt-4 {
+    margin-top: 1rem !important;
+  }
+  
+  .print\:space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  .print\:space-y-8 > * + * {
+    margin-top: 2rem !important;
+  }
+  
+  .print\:text-2xl {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+  
+  .print\:text-lg {
+    font-size: 1.125rem !important;
+    line-height: 1.75rem !important;
+  }
+  
+  .print\:text-base {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  
+  .print\:text-sm {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+  
+  .print\:text-xs {
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+  }
+  
+  .print\:text-\[10px\] {
+    font-size: 10px !important;
+  }
+  
+  .print\:bg-white {
+    background-color: white !important;
+  }
+  
+  .print\:bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+  
+  .print\:gap-2 {
+    gap: 0.5rem !important;
+  }
+  
+  /* Ensure proper page breaks for brackets */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  /* Print-friendly colors */
+  body {
+    color: black !important;
+    background: white !important;
+  }
+  
+  /* Hide unnecessary elements when printing */
+  button, .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure brackets fit on page */
+  .bracket-container {
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #262630;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a4960;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a5970;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #F2545B;
+  outline-offset: 2px;
+}
